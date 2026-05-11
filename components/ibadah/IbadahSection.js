@@ -7,9 +7,9 @@ import { Clock } from "lucide-react";
 const SALAHS = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
 
 const STATUS = {
-  "on-time": { label: "On Time", bg: "#064e3b", color: "#6ee7b7", border: "#065f46" },
-  "qaza":    { label: "Qaza",    bg: "#431407", color: "#fdba74", border: "#7c2d12" },
-  "missed":  { label: "Missed",  bg: "#2d0707", color: "#ef4444", border: "#991b1b" },
+  "on-time": { label: "On Time", bg: "var(--ok-bg)",   color: "var(--ok-text)",   border: "var(--ok-border)"   },
+  "qaza":    { label: "Qaza",    bg: "var(--warn-bg)", color: "var(--warn-text)", border: "var(--warn-border)" },
+  "missed":  { label: "Missed",  bg: "var(--err-bg)",  color: "var(--err-text)",  border: "var(--err-border)"  },
 };
 
 function todayKey() {
@@ -18,7 +18,6 @@ function todayKey() {
 
 export default function IbadahSection({ uid }) {
   const [data, setData] = useState({ salahs: {} });
-
   const docRef = doc(db, "users", uid, "ibadah", todayKey());
 
   useEffect(() => {
@@ -28,8 +27,7 @@ export default function IbadahSection({ uid }) {
   }, [uid]);
 
   function setSalahStatus(salah, status) {
-    const current = data.salahs?.[salah];
-    const next = current === status ? "" : status;
+    const next = data.salahs?.[salah] === status ? "" : status;
     const updated = { ...data, salahs: { ...data.salahs, [salah]: next } };
     setData(updated);
     setDoc(docRef, updated, { merge: true });
@@ -41,8 +39,7 @@ export default function IbadahSection({ uid }) {
     <div style={{ background: "var(--surface)", borderRadius: 16, padding: "1.5rem", border: "1px solid var(--border)" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.25rem" }}>
         <h2 style={{ fontSize: "1.1rem", fontWeight: 700, color: "var(--text)", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-          <Clock size={18} color="var(--accent)" />
-          Ibadah
+          <Clock size={18} color="var(--accent)" /> Ibadah
         </h2>
         <span style={{ background: "var(--accent-dim)", color: "var(--accent)", fontSize: "0.7rem", fontWeight: 700, padding: "0.2rem 0.6rem", borderRadius: 20 }}>
           {completedCount}/5 salah
@@ -57,7 +54,7 @@ export default function IbadahSection({ uid }) {
             <div key={salah} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.5rem 0.75rem", background: "var(--bg)", borderRadius: 8, border: `1px solid ${cfg?.border || "var(--border)"}` }}>
               <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
                 <Clock size={13} color={status === "on-time" ? "var(--accent)" : "var(--muted)"} />
-                <span style={{ color: status ? "var(--text)" : "var(--text-2)", fontSize: "0.875rem", fontWeight: 500 }}>{salah}</span>
+                <span style={{ color: "var(--text-2)", fontSize: "0.875rem", fontWeight: 500 }}>{salah}</span>
               </div>
               <div style={{ display: "flex", gap: "0.35rem" }}>
                 {Object.entries(STATUS).map(([key, s]) => {

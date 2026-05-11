@@ -11,12 +11,32 @@
   --accent:         #10b981;
   --accent-dim:     #10b98122;
   --accent-muted:   #064e3b;
+
+  /* Semantic status (ibadah salah) */
+  --ok-bg:          #064e3b;
+  --ok-text:        #6ee7b7;
+  --ok-border:      #065f46;
+  --warn-bg:        #431407;
+  --warn-text:      #fdba74;
+  --warn-border:    #7c2d12;
+  --err-bg:         #2d0707;
+  --err-text:       #ef4444;
+  --err-border:     #991b1b;
+
+  /* Priority badges (tasks) */
+  --prio-high-bg:   #450a0a;
+  --prio-high-text: #ef4444;
+  --prio-med-bg:    #431407;
+  --prio-med-text:  #f59e0b;
+  --prio-low-bg:    #064e3b;
+  --prio-low-text:  #6ee7b7;
+
+  /* Misc */
+  --cell-empty:     #1e293b;
   --danger:         #ef4444;
   --danger-surface: #450a0a;
   --danger-border:  #991b1b;
-  --warning:        #f59e0b;
-  --warning-surface:#431407;
-  --warning-border: #7c2d12;
+  --danger-text:    #fca5a5;
   --scrollbar-track:#1e293b;
   --scrollbar-thumb:#334155;
 }
@@ -34,12 +54,32 @@ html.light {
   --accent:         #059669;
   --accent-dim:     #d1fae5;
   --accent-muted:   #ecfdf5;
+
+  /* Semantic status */
+  --ok-bg:          #d1fae5;
+  --ok-text:        #065f46;
+  --ok-border:      #6ee7b7;
+  --warn-bg:        #fef3c7;
+  --warn-text:      #92400e;
+  --warn-border:    #fde68a;
+  --err-bg:         #fee2e2;
+  --err-text:       #991b1b;
+  --err-border:     #fca5a5;
+
+  /* Priority badges */
+  --prio-high-bg:   #fee2e2;
+  --prio-high-text: #dc2626;
+  --prio-med-bg:    #fef3c7;
+  --prio-med-text:  #d97706;
+  --prio-low-bg:    #d1fae5;
+  --prio-low-text:  #065f46;
+
+  /* Misc */
+  --cell-empty:     #e2e8f0;
   --danger:         #dc2626;
   --danger-surface: #fee2e2;
   --danger-border:  #fca5a5;
-  --warning:        #d97706;
-  --warning-surface:#fef3c7;
-  --warning-border: #fcd34d;
+  --danger-text:    #991b1b;
   --scrollbar-track:#e2e8f0;
   --scrollbar-thumb:#cbd5e1;
 }
@@ -64,15 +104,10 @@ html, body {
 a { color: inherit; text-decoration: none; }
 button { cursor: pointer; }
 
-input, select, textarea {
-  color-scheme: dark;
-}
-
+input, select, textarea { color-scheme: dark; }
 html.light input,
 html.light select,
-html.light textarea {
-  color-scheme: light;
-}
+html.light textarea { color-scheme: light; }
 
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--scrollbar-track); }

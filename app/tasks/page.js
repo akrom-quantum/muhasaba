@@ -8,16 +8,16 @@ import Sidebar from "@/components/shared/Sidebar";
 import TaskCard from "@/components/tasks/TaskCard";
 import { CheckSquare, Plus, Calendar } from "lucide-react";
 
-const accent = "#10b981";
-const bg = "#0f172a";
-const surface = "#1e293b";
-const border = "#334155";
-const muted = "#94a3b8";
+const accent = "var(--accent)";
+const bg = "var(--bg)";
+const surface = "var(--surface)";
+const border = "var(--border)";
+const muted = "var(--muted)";
 
 const PRIORITIES = {
-  high:   { label: "High", color: "#ef4444", bg: "#450a0a" },
-  medium: { label: "Med",  color: "#f59e0b", bg: "#431407" },
-  low:    { label: "Low",  color: "#6ee7b7", bg: "#064e3b" },
+  high:   { label: "High", color: "var(--prio-high-text)", bg: "var(--prio-high-bg)" },
+  medium: { label: "Med",  color: "var(--prio-med-text)",  bg: "var(--prio-med-bg)"  },
+  low:    { label: "Low",  color: "var(--prio-low-text)",  bg: "var(--prio-low-bg)"  },
 };
 
 function todayKey() {
@@ -106,12 +106,12 @@ export default function TasksPage() {
       <main style={{ flex: 1, padding: "2rem", overflowY: "auto" }}>
         {/* Header */}
         <div style={{ marginBottom: "2rem" }}>
-          <h1 style={{ fontSize: "1.75rem", fontWeight: 800, color: "#f1f5f9", marginBottom: "0.25rem", display: "flex", alignItems: "center", gap: "0.625rem" }}>
+          <h1 style={{ fontSize: "1.75rem", fontWeight: 800, color: "var(--text)", marginBottom: "0.25rem", display: "flex", alignItems: "center", gap: "0.625rem" }}>
             <CheckSquare size={24} color={accent} /> Tasks
           </h1>
           <p style={{ color: muted, fontSize: "0.875rem" }}>
             {totalPending} pending · {totalDone} done
-            {overdue.length > 0 && <span style={{ color: "#ef4444", marginLeft: "0.5rem" }}>· {overdue.length} overdue</span>}
+            {overdue.length > 0 && <span style={{ color: "var(--danger)", marginLeft: "0.5rem" }}>· {overdue.length} overdue</span>}
           </p>
         </div>
 
@@ -134,7 +134,7 @@ export default function TasksPage() {
           <input
             value={input} onChange={(e) => setInput(e.target.value)}
             placeholder="Add a task…"
-            style={{ flex: 1, padding: "0.7rem 1rem", background: surface, border: `1px solid ${border}`, borderRadius: 10, color: "#f1f5f9", fontSize: "0.9rem", outline: "none" }}
+            style={{ flex: 1, padding: "0.7rem 1rem", background: surface, border: `1px solid ${border}`, borderRadius: 10, color: "var(--text)", fontSize: "0.9rem", outline: "none" }}
           />
           <div style={{ display: "flex", gap: "0.3rem" }}>
             {Object.entries(PRIORITIES).map(([k, v]) => (
@@ -164,7 +164,7 @@ export default function TasksPage() {
         {sortedDates.length === 0 ? (
           <div style={{ textAlign: "center", padding: "4rem 0", color: muted }}>
             <CheckSquare size={40} color="#334155" style={{ margin: "0 auto 1rem" }} />
-            <p style={{ fontSize: "1rem", fontWeight: 600, color: "#475569", marginBottom: "0.5rem" }}>No tasks</p>
+            <p style={{ fontSize: "1rem", fontWeight: 600, color: "var(--text-3)", marginBottom: "0.5rem" }}>No tasks</p>
             <p style={{ fontSize: "0.875rem" }}>Add your first task above.</p>
           </div>
         ) : (
@@ -176,7 +176,7 @@ export default function TasksPage() {
                   {formatDateLabel(date)}
                 </span>
                 {date < todayKey() && groups[date].some((t) => !t.done) && (
-                  <span style={{ background: "#450a0a", color: "#ef4444", fontSize: "0.65rem", fontWeight: 700, padding: "0.1rem 0.4rem", borderRadius: 4 }}>OVERDUE</span>
+                  <span style={{ background: "var(--danger-surface)", color: "var(--danger)", fontSize: "0.65rem", fontWeight: 700, padding: "0.1rem 0.4rem", borderRadius: 4 }}>OVERDUE</span>
                 )}
               </div>
               {groups[date].map((t) => (

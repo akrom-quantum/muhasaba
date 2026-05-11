@@ -10,11 +10,11 @@ import { ICON_MAP } from "@/data/iconMap";
 import { Plus, Target, Flame, Trophy, ChevronRight } from "lucide-react";
 import Link from "next/link";
 
-const accent = "#10b981";
-const bg = "#0f172a";
-const surface = "#1e293b";
-const border = "#334155";
-const muted = "#94a3b8";
+const accent = "var(--accent)";
+const bg = "var(--bg)";
+const surface = "var(--surface)";
+const border = "var(--border)";
+const muted = "var(--muted)";
 
 function todayKey() {
   return new Date().toISOString().slice(0, 10);
@@ -80,7 +80,7 @@ export default function HabitsPage() {
         {/* Header */}
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "2rem" }}>
           <div>
-            <h1 style={{ fontSize: "1.75rem", fontWeight: 800, color: "#f1f5f9", marginBottom: "0.25rem", display: "flex", alignItems: "center", gap: "0.625rem" }}>
+            <h1 style={{ fontSize: "1.75rem", fontWeight: 800, color: "var(--text)", marginBottom: "0.25rem", display: "flex", alignItems: "center", gap: "0.625rem" }}>
               <Target size={24} color={accent} /> Habits
             </h1>
             <p style={{ color: muted, fontSize: "0.875rem" }}>{habits.length} habits · {doneToday} done today</p>
@@ -120,7 +120,7 @@ export default function HabitsPage() {
         {habits.length === 0 && !showForm ? (
           <div style={{ textAlign: "center", padding: "4rem 0", color: muted }}>
             <Target size={40} color="#334155" style={{ margin: "0 auto 1rem" }} />
-            <p style={{ fontSize: "1rem", fontWeight: 600, marginBottom: "0.5rem", color: "#475569" }}>No habits yet</p>
+            <p style={{ fontSize: "1rem", fontWeight: 600, marginBottom: "0.5rem", color: "var(--text-3)" }}>No habits yet</p>
             <p style={{ fontSize: "0.875rem" }}>Add your first habit to start tracking.</p>
           </div>
         ) : (
@@ -146,7 +146,7 @@ export default function HabitsPage() {
                   {/* Name + meta */}
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "0.2rem" }}>
-                      <span style={{ color: "#f1f5f9", fontWeight: 600, fontSize: "0.95rem" }}>{h.name}</span>
+                      <span style={{ color: "var(--text)", fontWeight: 600, fontSize: "0.95rem" }}>{h.name}</span>
                       {h.streak > 0 && (
                         <span style={{ color: "#f97316", fontSize: "0.75rem", fontWeight: 700 }}>🔥 {h.streak}</span>
                       )}

@@ -10,11 +10,11 @@ import MuhasabaForm from "@/components/muhasaba/MuhasabaForm";
 import MuhasabaCard from "@/components/muhasaba/MuhasabaCard";
 import { BookOpen, Plus } from "lucide-react";
 
-const accent = "#10b981";
-const bg = "#0f172a";
-const border = "#334155";
-const muted = "#94a3b8";
-const surface = "#1e293b";
+const accent = "var(--accent)";
+const bg = "var(--bg)";
+const border = "var(--border)";
+const muted = "var(--muted)";
+const surface = "var(--surface)";
 
 function todayKey() {
   return new Date().toISOString().slice(0, 10);
@@ -63,7 +63,7 @@ export default function MuhasabaPage() {
         {/* Header */}
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "2rem" }}>
           <div>
-            <h1 style={{ fontSize: "1.75rem", fontWeight: 800, color: "#f1f5f9", marginBottom: "0.25rem", display: "flex", alignItems: "center", gap: "0.625rem" }}>
+            <h1 style={{ fontSize: "1.75rem", fontWeight: 800, color: "var(--text)", marginBottom: "0.25rem", display: "flex", alignItems: "center", gap: "0.625rem" }}>
               <BookOpen size={24} color={accent} /> Muhasaba
             </h1>
             <p style={{ color: muted, fontSize: "0.875rem" }}>{totalEntries} total entries</p>

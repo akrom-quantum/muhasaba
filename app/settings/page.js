@@ -7,11 +7,11 @@ import { useAuth } from "@/context/AuthContext";
 import Sidebar from "@/components/shared/Sidebar";
 import { Layers, LogOut, User, Shield } from "lucide-react";
 
-const accent = "#10b981";
-const bg = "#0f172a";
-const surface = "#1e293b";
-const border = "#334155";
-const muted = "#94a3b8";
+const accent = "var(--accent)";
+const bg = "var(--bg)";
+const surface = "var(--surface)";
+const border = "var(--border)";
+const muted = "var(--muted)";
 
 export default function SettingsPage() {
   const user = useAuth();
@@ -28,7 +28,7 @@ export default function SettingsPage() {
       <Sidebar />
       <main style={{ flex: 1, padding: "2rem", overflowY: "auto" }}>
         <div style={{ maxWidth: 560 }}>
-          <h1 style={{ fontSize: "1.75rem", fontWeight: 800, color: "#f1f5f9", marginBottom: "0.25rem", display: "flex", alignItems: "center", gap: "0.625rem" }}>
+          <h1 style={{ fontSize: "1.75rem", fontWeight: 800, color: "var(--text)", marginBottom: "0.25rem", display: "flex", alignItems: "center", gap: "0.625rem" }}>
             <Layers size={24} color={accent} /> Settings
           </h1>
           <p style={{ color: muted, fontSize: "0.875rem", marginBottom: "2rem" }}>Manage your account</p>
@@ -44,7 +44,7 @@ export default function SettingsPage() {
                   {user.email?.[0]?.toUpperCase()}
                 </div>
                 <div>
-                  <p style={{ color: "#f1f5f9", fontWeight: 600, fontSize: "0.95rem" }}>{user.displayName || "User"}</p>
+                  <p style={{ color: "var(--text)", fontWeight: 600, fontSize: "0.95rem" }}>{user.displayName || "User"}</p>
                   <p style={{ color: muted, fontSize: "0.85rem" }}>{user.email}</p>
                 </div>
               </div>

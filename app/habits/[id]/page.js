@@ -11,11 +11,11 @@ import { ICON_MAP } from "@/data/iconMap";
 import { Flame, Trophy, ChevronLeft, Target, Pencil, Trash2, Check } from "lucide-react";
 import Link from "next/link";
 
-const accent = "#10b981";
-const bg = "#0f172a";
-const surface = "#1e293b";
-const border = "#334155";
-const muted = "#94a3b8";
+const accent = "var(--accent)";
+const bg = "var(--bg)";
+const surface = "var(--surface)";
+const border = "var(--border)";
+const muted = "var(--muted)";
 
 function todayKey() {
   return new Date().toISOString().slice(0, 10);
@@ -161,7 +161,7 @@ export default function HabitDetailPage() {
             <Icon size={24} color={habit.color} />
           </div>
           <div style={{ flex: 1 }}>
-            <h1 style={{ fontSize: "1.5rem", fontWeight: 800, color: "#f1f5f9", marginBottom: "0.125rem" }}>{habit.name}</h1>
+            <h1 style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--text)", marginBottom: "0.125rem" }}>{habit.name}</h1>
             <p style={{ color: muted, fontSize: "0.85rem" }}>
               {habit.goalType === "boolean" ? "Daily habit" : `${habit.goalValue} ${habit.unit} / day`}
             </p>
@@ -337,5 +337,5 @@ const labelStyle = {
 const inputStyle = {
   width: "100%", padding: "0.5rem 0.75rem",
   background: "#0f172a", border: "1px solid #334155",
-  borderRadius: 6, color: "#f1f5f9", fontSize: "0.875rem", outline: "none",
+  borderRadius: 6, color: "var(--text)", fontSize: "0.875rem", outline: "none",
 };
