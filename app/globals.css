@@ -1,49 +1,79 @@
+/* ── Dark theme (default) ── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg:             #0f172a;
+  --surface:        #1e293b;
+  --surface-2:      #162032;
+  --border:         #334155;
+  --text:           #f1f5f9;
+  --text-2:         #cbd5e1;
+  --text-3:         #475569;
+  --muted:          #94a3b8;
+  --accent:         #10b981;
+  --accent-dim:     #10b98122;
+  --accent-muted:   #064e3b;
+  --danger:         #ef4444;
+  --danger-surface: #450a0a;
+  --danger-border:  #991b1b;
+  --warning:        #f59e0b;
+  --warning-surface:#431407;
+  --warning-border: #7c2d12;
+  --scrollbar-track:#1e293b;
+  --scrollbar-thumb:#334155;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ── Light theme ── */
+html.light {
+  --bg:             #f1f5f9;
+  --surface:        #ffffff;
+  --surface-2:      #f8fafc;
+  --border:         #e2e8f0;
+  --text:           #0f172a;
+  --text-2:         #1e293b;
+  --text-3:         #94a3b8;
+  --muted:          #64748b;
+  --accent:         #059669;
+  --accent-dim:     #d1fae5;
+  --accent-muted:   #ecfdf5;
+  --danger:         #dc2626;
+  --danger-surface: #fee2e2;
+  --danger-border:  #fca5a5;
+  --warning:        #d97706;
+  --warning-surface:#fef3c7;
+  --warning-border: #fcd34d;
+  --scrollbar-track:#e2e8f0;
+  --scrollbar-thumb:#cbd5e1;
 }
 
-html {
-  height: 100%;
-}
-
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-
-body {
-  min-height: 100%;
-  display: flex;
-  flex-direction: column;
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-* {
+*, *::before, *::after {
   box-sizing: border-box;
   padding: 0;
   margin: 0;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+html, body {
+  height: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: var(--bg);
+  color: var(--text);
+  transition: background 0.2s, color 0.2s;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
+a { color: inherit; text-decoration: none; }
+button { cursor: pointer; }
+
+input, select, textarea {
+  color-scheme: dark;
 }
+
+html.light input,
+html.light select,
+html.light textarea {
+  color-scheme: light;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
