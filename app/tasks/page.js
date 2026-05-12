@@ -41,6 +41,7 @@ export default function TasksPage() {
   const [input, setInput] = useState("");
   const [priority, setPriority] = useState("medium");
   const [adding, setAdding] = useState(false);
+  const [addError, setAddError] = useState("");
   const [filter, setFilter] = useState("all"); // all | pending | done
 
   useEffect(() => {
@@ -51,19 +52,23 @@ export default function TasksPage() {
     if (!user) return;
     const col = collection(db, "users", user.uid, "tasks");
     const q = query(col, orderBy("createdAt", "desc"));
-    return onSnapshot(q, (snap) => {
-      setTasks(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
-    });
+    return onSnapshot(q,
+      (snap) => { setTasks(snap.docs.map((d) => ({ id: d.id, ...d.data() }))); },
+      (err) => { setAddError("Firestore: " + err.message); }
+    );
   }, [user]);
 
   async function handleAdd(e) {
     e.preventDefault();
     if (!input.trim()) return;
     setAdding(true);
+    setAddError("");
     try {
       const col = collection(db, "users", user.uid, "tasks");
       await addDoc(col, { text: input.trim(), done: false, priority, date: todayKey(), createdAt: serverTimestamp() });
       setInput("");
+    } catch (err) {
+      setAddError(err.message || "Failed to add task");
     } finally {
       setAdding(false);
     }
@@ -149,6 +154,9 @@ export default function TasksPage() {
             <Plus size={15} /> Add
           </button>
         </form>
+        {addError && (
+          <p style={{ color: "var(--danger)", fontSize: "0.8rem", marginTop: "-1rem", marginBottom: "1rem" }}>⚠ {addError}</p>
+        )}
 
         {/* Filter tabs */}
         <div style={{ display: "flex", gap: "0.35rem", marginBottom: "1.25rem", background: surface, borderRadius: 10, padding: 4, width: "fit-content" }}>
