@@ -7,7 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import Sidebar from "@/components/shared/Sidebar";
 import TaskCard from "@/components/tasks/TaskCard";
 import TaskCalendar from "@/components/tasks/TaskCalendar";
-import { CheckSquare, Plus } from "lucide-react";
+import { CheckSquare } from "lucide-react";
 
 const accent  = "var(--accent)";
 const bg      = "var(--bg)";
@@ -49,9 +49,8 @@ export default function TasksPage() {
     }, (err) => setAddError("Error: " + err.message));
   }, [user]);
 
-  async function handleAdd(e) {
-    e.preventDefault();
-    if (!input.trim()) return;
+  async function handleAdd() {
+    if (!input.trim() || adding) return;
     setAdding(true);
     setAddError("");
     try {
@@ -69,6 +68,10 @@ export default function TasksPage() {
     } finally {
       setAdding(false);
     }
+  }
+
+  function handleKeyDown(e) {
+    if (e.key === "Enter") handleAdd();
   }
 
   async function handleToggle(id, done) {
@@ -137,17 +140,17 @@ export default function TasksPage() {
               {selectedDate === today ? "Today" : dateLabel || "All Tasks"}
             </p>
 
-            {/* Add form */}
-            <form onSubmit={handleAdd} style={{ marginBottom: "1.25rem" }}>
+            {/* Add task */}
+            <div style={{ marginBottom: "1.25rem" }}>
               <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.4rem" }}>
                 <input
-                  value={input} onChange={(e) => setInput(e.target.value)}
+                  value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={handleKeyDown}
                   placeholder={`Add to ${selectedDate === today ? "today" : dateLabel || "tasks"}…`}
                   style={{ flex: 1, padding: "0.65rem 0.875rem", background: bg, border: `1px solid ${border}`, borderRadius: 8, color: "var(--text)", fontSize: "0.875rem", outline: "none", minWidth: 0 }}
                 />
-                <button type="submit" disabled={adding || !input.trim()}
-                  style={{ padding: "0.6rem 1rem", background: accent, border: "none", borderRadius: 8, color: "#fff", fontWeight: 700, fontSize: "0.875rem", opacity: adding || !input.trim() ? 0.5 : 1, flexShrink: 0 }}>
-                  + Add
+                <button type="button" onClick={handleAdd} disabled={adding || !input.trim()}
+                  style={{ padding: "0.6rem 1rem", background: accent, border: "none", borderRadius: 8, color: "#fff", fontWeight: 700, fontSize: "0.875rem", opacity: adding || !input.trim() ? 0.5 : 1, flexShrink: 0, cursor: "pointer" }}>
+                  {adding ? "…" : "+ Add"}
                 </button>
               </div>
               <div style={{ display: "flex", gap: "0.3rem" }}>
@@ -159,7 +162,7 @@ export default function TasksPage() {
                 ))}
               </div>
               {addError && <p style={{ color: "var(--danger)", fontSize: "0.78rem", marginTop: "0.4rem" }}>⚠ {addError}</p>}
-            </form>
+            </div>
 
             {/* Day task list */}
             {selectedDate ? (
