@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, onSnapshot, query, deleteDoc, doc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { CheckSquare } from "lucide-react";
 import TaskCard from "./TaskCard";
@@ -24,9 +24,15 @@ export default function TasksSection({ uid }) {
   const col = collection(db, "users", uid, "tasks");
 
   useEffect(() => {
-    const q = query(col, orderBy("createdAt", "desc"));
+    const q = query(col);
     return onSnapshot(q, (snap) => {
-      setTasks(snap.docs.map((d) => ({ id: d.id, ...d.data() })).filter((t) => t.date === todayKey()));
+      const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() })).filter((t) => t.date === todayKey());
+      docs.sort((a, b) => {
+        const at = a.createdAt?.toMillis?.() ?? (a.createdAt || 0);
+        const bt = b.createdAt?.toMillis?.() ?? (b.createdAt || 0);
+        return bt - at;
+      });
+      setTasks(docs);
     });
   }, [uid]);
 

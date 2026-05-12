@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, onSnapshot, query, deleteDoc, doc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/context/AuthContext";
 import Sidebar from "@/components/shared/Sidebar";
@@ -51,9 +51,17 @@ export default function TasksPage() {
   useEffect(() => {
     if (!user) return;
     const col = collection(db, "users", user.uid, "tasks");
-    const q = query(col, orderBy("createdAt", "desc"));
+    const q = query(col);
     return onSnapshot(q,
-      (snap) => { setTasks(snap.docs.map((d) => ({ id: d.id, ...d.data() }))); },
+      (snap) => {
+        const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        docs.sort((a, b) => {
+          const at = a.createdAt?.toMillis?.() ?? (a.createdAt || 0);
+          const bt = b.createdAt?.toMillis?.() ?? (b.createdAt || 0);
+          return bt - at;
+        });
+        setTasks(docs);
+      },
       (err) => { setAddError("Firestore: " + err.message); }
     );
   }, [user]);
