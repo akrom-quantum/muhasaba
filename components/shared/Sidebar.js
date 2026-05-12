@@ -11,6 +11,7 @@ import { Sun, Moon, ChevronLeft, ChevronRight, Menu, X } from "lucide-react";
 
 const NAV = [
   { href: "/today",    icon: "Sun",         label: "Today" },
+  { href: "/general",  icon: "Calendar",    label: "General" },
   { href: "/muhasaba", icon: "BookOpen",    label: "Muhasaba" },
   { href: "/habits",   icon: "Target",      label: "Habits" },
   { href: "/tasks",    icon: "CheckSquare", label: "Tasks" },
@@ -29,9 +30,9 @@ function NavLinks({ collapsed, onNav }) {
             title={collapsed ? label : undefined}
             style={{
               display: "flex", alignItems: "center",
-              gap: collapsed ? 0 : "0.75rem",
-              padding: "0.6rem",
-              justifyContent: "center",
+              gap: "0.75rem",
+              padding: collapsed ? "0.6rem" : "0.6rem 0.875rem",
+              justifyContent: collapsed ? "center" : "flex-start",
               borderRadius: 8,
               background: active ? "var(--accent-dim)" : "transparent",
               color: active ? "var(--accent)" : "var(--muted)",
@@ -40,7 +41,7 @@ function NavLinks({ collapsed, onNav }) {
               whiteSpace: "nowrap", overflow: "hidden",
             }}>
             {Icon && <Icon size={16} style={{ flexShrink: 0 }} />}
-            {!collapsed && <span style={{ marginLeft: "0.75rem" }}>{label}</span>}
+            {!collapsed && <span>{label}</span>}
           </Link>
         );
       })}
