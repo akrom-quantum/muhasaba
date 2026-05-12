@@ -135,24 +135,26 @@ export default function TasksPage() {
         </div>
 
         {/* Add task */}
-        <form onSubmit={handleAdd} style={{ display: "flex", gap: "0.5rem", marginBottom: "1.5rem" }}>
-          <input
-            value={input} onChange={(e) => setInput(e.target.value)}
-            placeholder="Add a task…"
-            style={{ flex: 1, padding: "0.7rem 1rem", background: surface, border: `1px solid ${border}`, borderRadius: 10, color: "var(--text)", fontSize: "0.9rem", outline: "none" }}
-          />
-          <div style={{ display: "flex", gap: "0.3rem" }}>
+        <form onSubmit={handleAdd} style={{ marginBottom: "1.5rem" }}>
+          <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.5rem" }}>
+            <input
+              value={input} onChange={(e) => setInput(e.target.value)}
+              placeholder="Add a task…"
+              style={{ flex: 1, padding: "0.7rem 1rem", background: surface, border: `1px solid ${border}`, borderRadius: 10, color: "var(--text)", fontSize: "0.9rem", outline: "none", minWidth: 0 }}
+            />
+            <button type="submit" disabled={adding || !input.trim()}
+              style={{ display: "flex", alignItems: "center", gap: "0.4rem", padding: "0.6rem 1.1rem", background: accent, border: "none", borderRadius: 10, color: "#fff", fontWeight: 600, fontSize: "0.875rem", opacity: adding || !input.trim() ? 0.5 : 1, flexShrink: 0 }}>
+              <Plus size={15} /> Add
+            </button>
+          </div>
+          <div style={{ display: "flex", gap: "0.35rem" }}>
             {Object.entries(PRIORITIES).map(([k, v]) => (
               <button key={k} type="button" onClick={() => setPriority(k)}
-                style={{ padding: "0.4rem 0.7rem", borderRadius: 7, border: `1px solid ${priority === k ? v.color : border}`, background: priority === k ? v.bg : "transparent", color: priority === k ? v.color : muted, fontSize: "0.72rem", fontWeight: 700 }}>
+                style={{ padding: "0.35rem 0.75rem", borderRadius: 7, border: `1px solid ${priority === k ? v.color : border}`, background: priority === k ? v.bg : "transparent", color: priority === k ? v.color : muted, fontSize: "0.75rem", fontWeight: 700 }}>
                 {v.label}
               </button>
             ))}
           </div>
-          <button type="submit" disabled={adding || !input.trim()}
-            style={{ display: "flex", alignItems: "center", gap: "0.4rem", padding: "0.6rem 1rem", background: accent, border: "none", borderRadius: 10, color: "#fff", fontWeight: 600, fontSize: "0.875rem", opacity: adding || !input.trim() ? 0.5 : 1 }}>
-            <Plus size={15} /> Add
-          </button>
         </form>
         {addError && (
           <p style={{ color: "var(--danger)", fontSize: "0.8rem", marginTop: "-1rem", marginBottom: "1rem" }}>⚠ {addError}</p>

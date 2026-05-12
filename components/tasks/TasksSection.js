@@ -67,24 +67,26 @@ export default function TasksSection({ uid }) {
         </h2>
       </div>
 
-      <form onSubmit={handleAdd} style={{ display: "flex", gap: "0.5rem", marginBottom: "1.25rem" }}>
-        <input
-          value={input} onChange={(e) => setInput(e.target.value)}
-          placeholder="Add a task…"
-          style={{ flex: 1, padding: "0.6rem 0.875rem", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 8, color: "var(--text)", fontSize: "0.875rem", outline: "none" }}
-        />
+      <form onSubmit={handleAdd} style={{ marginBottom: "1.25rem" }}>
+        <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.4rem" }}>
+          <input
+            value={input} onChange={(e) => setInput(e.target.value)}
+            placeholder="Add a task…"
+            style={{ flex: 1, padding: "0.6rem 0.875rem", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 8, color: "var(--text)", fontSize: "0.875rem", outline: "none", minWidth: 0 }}
+          />
+          <button type="submit" disabled={adding || !input.trim()}
+            style={{ padding: "0.5rem 0.875rem", background: "var(--accent)", border: "none", borderRadius: 8, color: "#fff", fontWeight: 700, fontSize: "0.875rem", opacity: adding || !input.trim() ? 0.5 : 1, flexShrink: 0 }}>
+            + Add
+          </button>
+        </div>
         <div style={{ display: "flex", gap: "0.25rem" }}>
           {Object.entries(PRIORITIES).map(([k, v]) => (
             <button key={k} type="button" onClick={() => setPriority(k)}
-              style={{ padding: "0.4rem 0.6rem", borderRadius: 6, border: `1px solid ${priority === k ? v.color : "var(--border)"}`, background: priority === k ? v.bg : "transparent", color: priority === k ? v.color : "var(--muted)", fontSize: "0.7rem", fontWeight: 700 }}>
+              style={{ padding: "0.3rem 0.6rem", borderRadius: 6, border: `1px solid ${priority === k ? v.color : "var(--border)"}`, background: priority === k ? v.bg : "transparent", color: priority === k ? v.color : "var(--muted)", fontSize: "0.7rem", fontWeight: 700 }}>
               {v.label}
             </button>
           ))}
         </div>
-        <button type="submit" disabled={adding || !input.trim()}
-          style={{ padding: "0.5rem 1rem", background: "var(--accent)", border: "none", borderRadius: 8, color: "#fff", fontWeight: 600, fontSize: "0.875rem", opacity: adding || !input.trim() ? 0.5 : 1 }}>
-          +
-        </button>
       </form>
 
       {tasks.length === 0 ? (
