@@ -2,11 +2,22 @@
 import { X } from "lucide-react";
 import { ICON_MAP } from "@/data/iconMap";
 
+function repeatLabel(repeat) {
+  if (!repeat || repeat.type === "daily") return null;
+  if (repeat.type === "times_per_week") return `${repeat.timesPerWeek}×/wk`;
+  if (repeat.type === "specific_days") {
+    const abbr = { Sun: "Su", Mon: "M", Tue: "T", Wed: "W", Thu: "Th", Fri: "F", Sat: "Sa" };
+    return (repeat.days || []).map((d) => abbr[d] || d).join(" ");
+  }
+  return null;
+}
+
 export default function HabitCard({ habit, log, onToggle, onCountChange, onDelete }) {
   const Icon = ICON_MAP[habit.icon] || ICON_MAP["Star"];
   const done = log?.done || false;
   const value = log?.value || 0;
   const progress = habit.goalType === "count" ? Math.min(1, value / (habit.goalValue || 1)) : done ? 1 : 0;
+  const badge = repeatLabel(habit.repeat);
 
   return (
     <div style={{ background: "var(--bg)", borderRadius: 10, padding: "0.875rem 1rem", border: `1px solid ${done ? habit.color + "55" : "var(--border)"}`, transition: "border-color 0.2s" }}>
@@ -16,7 +27,14 @@ export default function HabitCard({ habit, log, onToggle, onCountChange, onDelet
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <span style={{ color: done ? "var(--text)" : "var(--text-2)", fontWeight: 600, fontSize: "0.875rem" }}>{habit.name}</span>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+              <span style={{ color: done ? "var(--text)" : "var(--text-2)", fontWeight: 600, fontSize: "0.875rem" }}>{habit.name}</span>
+              {badge && (
+                <span style={{ color: "var(--muted)", fontSize: "0.65rem", fontWeight: 600, background: "var(--surface)", padding: "0.1rem 0.35rem", borderRadius: 4 }}>
+                  {badge}
+                </span>
+              )}
+            </div>
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
               {habit.streak > 0 && <span style={{ color: "#f97316", fontSize: "0.72rem", fontWeight: 700 }}>🔥 {habit.streak}</span>}
               {onDelete && (

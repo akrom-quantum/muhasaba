@@ -2,9 +2,10 @@
 import { useState } from "react";
 import ColorPicker from "./ColorPicker";
 import IconPicker from "./IconPicker";
+import RepeatPicker, { DEFAULT_REPEAT } from "./RepeatPicker";
 import { PREBUILT_HABITS } from "@/data/prebuiltHabits";
 
-const empty = { name: "", icon: "Star", color: "#10b981", goalType: "boolean", goalValue: 1, unit: "" };
+const empty = { name: "", icon: "Star", color: "#10b981", goalType: "boolean", goalValue: 1, unit: "", repeat: DEFAULT_REPEAT };
 
 export default function HabitForm({ onSave, onCancel, saving }) {
   const [form, setForm] = useState(empty);
@@ -69,9 +70,13 @@ export default function HabitForm({ onSave, onCancel, saving }) {
               </div>
             </div>
           )}
-          <div style={{ marginBottom: "1rem" }}>
+          <div style={{ marginBottom: "0.75rem" }}>
             <label style={labelStyle}>Color</label>
             <ColorPicker value={form.color} onChange={(v) => setForm({ ...form, color: v })} />
+          </div>
+          <div style={{ marginBottom: "1rem" }}>
+            <label style={labelStyle}>Repeat</label>
+            <RepeatPicker value={form.repeat} onChange={(v) => setForm({ ...form, repeat: v })} />
           </div>
           <div style={{ display: "flex", gap: "0.5rem" }}>
             <button type="submit" disabled={saving}

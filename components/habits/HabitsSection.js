@@ -5,11 +5,7 @@ import { db } from "@/lib/firebase";
 import { Target } from "lucide-react";
 import HabitCard from "./HabitCard";
 import HabitForm from "./HabitForm";
-
-const accent = "#10b981";
-const surface = "#1e293b";
-const border = "#334155";
-const muted = "#94a3b8";
+import { isScheduledToday, getPrevScheduledDay, getMonday, DEFAULT_REPEAT } from "./RepeatPicker";
 
 function todayKey() {
   return new Date().toISOString().slice(0, 10);
@@ -44,7 +40,12 @@ export default function HabitsSection({ uid }) {
   async function handleAddHabit(form) {
     setSaving(true);
     try {
-      await addDoc(habitsCol, { ...form, streak: 0, bestStreak: 0, lastCompletedDate: null, createdAt: serverTimestamp() });
+      await addDoc(habitsCol, {
+        ...form,
+        streak: 0, bestStreak: 0, lastCompletedDate: null,
+        currentWeekKey: null, currentWeekCount: 0, lastCompletedWeek: null,
+        createdAt: serverTimestamp(),
+      });
       setOpen(false);
     } finally {
       setSaving(false);
@@ -81,45 +82,74 @@ export default function HabitsSection({ uid }) {
     const d = snap.data();
     const today = todayKey();
     if (d.lastCompletedDate === today) return;
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yKey = yesterday.toISOString().slice(0, 10);
-    const newStreak = d.lastCompletedDate === yKey ? (d.streak || 0) + 1 : 1;
-    const bestStreak = Math.max(d.bestStreak || 0, newStreak);
-    await updateDoc(habitRef, { streak: newStreak, bestStreak, lastCompletedDate: today });
+
+    const repeat = d.repeat || DEFAULT_REPEAT;
+
+    if (repeat.type === "times_per_week") {
+      const thisMonday = getMonday(today);
+      const timesPerWeek = repeat.timesPerWeek || 3;
+      let weekKey = d.currentWeekKey;
+      let weekCount = d.currentWeekCount || 0;
+      if (weekKey !== thisMonday) { weekKey = thisMonday; weekCount = 0; }
+      weekCount += 1;
+      const updates = { currentWeekKey: weekKey, currentWeekCount: weekCount, lastCompletedDate: today };
+      if (weekCount === timesPerWeek) {
+        const prevMon = new Date(thisMonday + "T00:00:00");
+        prevMon.setDate(prevMon.getDate() - 7);
+        const prevMonKey = prevMon.toISOString().slice(0, 10);
+        const newStreak = d.lastCompletedWeek === prevMonKey ? (d.streak || 0) + 1 : 1;
+        updates.streak = newStreak;
+        updates.bestStreak = Math.max(d.bestStreak || 0, newStreak);
+        updates.lastCompletedWeek = thisMonday;
+      }
+      await updateDoc(habitRef, updates);
+    } else if (repeat.type === "specific_days") {
+      const prevDay = getPrevScheduledDay(today, repeat.days || []);
+      const newStreak = d.lastCompletedDate === prevDay ? (d.streak || 0) + 1 : 1;
+      await updateDoc(habitRef, { streak: newStreak, bestStreak: Math.max(d.bestStreak || 0, newStreak), lastCompletedDate: today });
+    } else {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yKey = yesterday.toISOString().slice(0, 10);
+      const newStreak = d.lastCompletedDate === yKey ? (d.streak || 0) + 1 : 1;
+      await updateDoc(habitRef, { streak: newStreak, bestStreak: Math.max(d.bestStreak || 0, newStreak), lastCompletedDate: today });
+    }
   }
 
   async function handleDelete(id) {
     await deleteDoc(doc(db, "users", uid, "habits", id));
   }
 
-  const doneCount = habits.filter((h) => todayLogs[h.id]?.done).length;
+  const scheduledHabits = habits.filter((h) => isScheduledToday(h));
+  const doneCount = scheduledHabits.filter((h) => todayLogs[h.id]?.done).length;
 
   return (
-    <div style={{ background: surface, borderRadius: 16, padding: "1.5rem", border: `1px solid ${border}` }}>
+    <div style={{ background: "var(--surface)", borderRadius: 16, padding: "1.5rem", border: "1px solid var(--border)" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.25rem" }}>
-        <h2 style={{ fontSize: "1.1rem", fontWeight: 700, color: "#f1f5f9", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-          <Target size={18} color={accent} />
+        <h2 style={{ fontSize: "1.1rem", fontWeight: 700, color: "var(--text)", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <Target size={18} color="var(--accent)" />
           Habits
-          {habits.length > 0 && (
-            <span style={{ background: accent + "22", color: accent, fontSize: "0.7rem", fontWeight: 700, padding: "0.2rem 0.6rem", borderRadius: 20 }}>
-              {doneCount}/{habits.length}
+          {scheduledHabits.length > 0 && (
+            <span style={{ background: "var(--accent-dim)", color: "var(--accent)", fontSize: "0.7rem", fontWeight: 700, padding: "0.2rem 0.6rem", borderRadius: 20 }}>
+              {doneCount}/{scheduledHabits.length}
             </span>
           )}
         </h2>
         <button onClick={() => setOpen(!open)}
-          style={{ padding: "0.4rem 0.9rem", background: open ? "transparent" : accent, border: `1px solid ${open ? border : accent}`, borderRadius: 8, color: open ? muted : "#fff", fontSize: "0.8rem", fontWeight: 600 }}>
+          style={{ padding: "0.4rem 0.9rem", background: open ? "transparent" : "var(--accent)", border: `1px solid ${open ? "var(--border)" : "var(--accent)"}`, borderRadius: 8, color: open ? "var(--muted)" : "#fff", fontSize: "0.8rem", fontWeight: 600 }}>
           {open ? "Cancel" : "+ Add"}
         </button>
       </div>
 
       {open && <HabitForm onSave={handleAddHabit} onCancel={() => setOpen(false)} saving={saving} />}
 
-      {habits.length === 0 && !open ? (
-        <p style={{ color: muted, fontSize: "0.875rem", textAlign: "center", padding: "1rem 0" }}>No habits yet</p>
+      {scheduledHabits.length === 0 && !open ? (
+        <p style={{ color: "var(--muted)", fontSize: "0.875rem", textAlign: "center", padding: "1rem 0" }}>
+          {habits.length === 0 ? "No habits yet" : "No habits scheduled today"}
+        </p>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-          {habits.map((h) => (
+          {scheduledHabits.map((h) => (
             <HabitCard
               key={h.id} habit={h} log={todayLogs[h.id]}
               onToggle={handleToggle}

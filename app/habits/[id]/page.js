@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import Sidebar from "@/components/shared/Sidebar";
 import ColorPicker from "@/components/habits/ColorPicker";
 import IconPicker from "@/components/habits/IconPicker";
+import RepeatPicker, { DEFAULT_REPEAT, getPrevScheduledDay, getMonday } from "@/components/habits/RepeatPicker";
 import { ICON_MAP } from "@/data/iconMap";
 import { Flame, Trophy, ChevronLeft, Target, Pencil, Trash2, Check } from "lucide-react";
 import Link from "next/link";
@@ -108,12 +109,38 @@ export default function HabitDetailPage() {
     const d = snap.data();
     const today = todayKey();
     if (d.lastCompletedDate === today) return;
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yKey = yesterday.toISOString().slice(0, 10);
-    const newStreak = d.lastCompletedDate === yKey ? (d.streak || 0) + 1 : 1;
-    const bestStreak = Math.max(d.bestStreak || 0, newStreak);
-    await updateDoc(habitRef, { streak: newStreak, bestStreak, lastCompletedDate: today });
+
+    const repeat = d.repeat || DEFAULT_REPEAT;
+
+    if (repeat.type === "times_per_week") {
+      const thisMonday = getMonday(today);
+      const timesPerWeek = repeat.timesPerWeek || 3;
+      let weekKey = d.currentWeekKey;
+      let weekCount = d.currentWeekCount || 0;
+      if (weekKey !== thisMonday) { weekKey = thisMonday; weekCount = 0; }
+      weekCount += 1;
+      const updates = { currentWeekKey: weekKey, currentWeekCount: weekCount, lastCompletedDate: today };
+      if (weekCount === timesPerWeek) {
+        const prevMon = new Date(thisMonday + "T00:00:00");
+        prevMon.setDate(prevMon.getDate() - 7);
+        const prevMonKey = prevMon.toISOString().slice(0, 10);
+        const newStreak = d.lastCompletedWeek === prevMonKey ? (d.streak || 0) + 1 : 1;
+        updates.streak = newStreak;
+        updates.bestStreak = Math.max(d.bestStreak || 0, newStreak);
+        updates.lastCompletedWeek = thisMonday;
+      }
+      await updateDoc(habitRef, updates);
+    } else if (repeat.type === "specific_days") {
+      const prevDay = getPrevScheduledDay(today, repeat.days || []);
+      const newStreak = d.lastCompletedDate === prevDay ? (d.streak || 0) + 1 : 1;
+      await updateDoc(habitRef, { streak: newStreak, bestStreak: Math.max(d.bestStreak || 0, newStreak), lastCompletedDate: today });
+    } else {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yKey = yesterday.toISOString().slice(0, 10);
+      const newStreak = d.lastCompletedDate === yKey ? (d.streak || 0) + 1 : 1;
+      await updateDoc(habitRef, { streak: newStreak, bestStreak: Math.max(d.bestStreak || 0, newStreak), lastCompletedDate: today });
+    }
   }
 
   async function handleSaveEdit(e) {
@@ -223,9 +250,13 @@ export default function HabitDetailPage() {
                 </div>
               </div>
             )}
-            <div style={{ marginBottom: "1rem" }}>
+            <div style={{ marginBottom: "0.875rem" }}>
               <label style={labelStyle}>Color</label>
               <ColorPicker value={editForm.color} onChange={(v) => setEditForm({ ...editForm, color: v })} />
+            </div>
+            <div style={{ marginBottom: "1rem" }}>
+              <label style={labelStyle}>Repeat</label>
+              <RepeatPicker value={editForm.repeat || DEFAULT_REPEAT} onChange={(v) => setEditForm({ ...editForm, repeat: v })} />
             </div>
             <div style={{ display: "flex", gap: "0.5rem" }}>
               <button type="submit" disabled={saving}
@@ -303,12 +334,16 @@ export default function HabitDetailPage() {
                     const isToday = day === todayKey();
                     const isDone = log?.done;
                     const isPartial = log && !log.done && (log.value || 0) > 0;
-                    let cellBg = "#1e293b";
-                    if (isDone) cellBg = habit.color;
+                    const repeat = habit.repeat || DEFAULT_REPEAT;
+                    const dayOfWeek = new Date(day + "T00:00:00").toLocaleDateString("en-US", { weekday: "short" });
+                    const isScheduled = repeat.type === "daily" || repeat.type === "times_per_week" || (repeat.days || []).includes(dayOfWeek);
+                    let cellBg = "var(--cell-empty)";
+                    if (!isScheduled) cellBg = "transparent";
+                    else if (isDone) cellBg = habit.color;
                     else if (isPartial) cellBg = habit.color + "55";
                     return (
                       <div key={day} title={day}
-                        style={{ width: 11, height: 11, borderRadius: 2, background: cellBg, border: isToday ? `1px solid ${habit.color}` : "none", transition: "background 0.2s" }} />
+                        style={{ width: 11, height: 11, borderRadius: 2, background: cellBg, border: isToday ? `1px solid ${habit.color}` : "none", transition: "background 0.2s", opacity: isScheduled ? 1 : 0.2 }} />
                     );
                   })}
                 </div>
@@ -317,7 +352,7 @@ export default function HabitDetailPage() {
             {/* Legend */}
             <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginTop: "0.875rem" }}>
               <span style={{ color: muted, fontSize: "0.7rem" }}>Less</span>
-              {["#1e293b", habit.color + "55", habit.color].map((c, i) => (
+              {["var(--cell-empty)", habit.color + "55", habit.color].map((c, i) => (
                 <div key={i} style={{ width: 11, height: 11, borderRadius: 2, background: c }} />
               ))}
               <span style={{ color: muted, fontSize: "0.7rem" }}>More</span>
@@ -336,6 +371,6 @@ const labelStyle = {
 
 const inputStyle = {
   width: "100%", padding: "0.5rem 0.75rem",
-  background: "#0f172a", border: "1px solid #334155",
+  background: "var(--bg)", border: "1px solid var(--border)",
   borderRadius: 6, color: "var(--text)", fontSize: "0.875rem", outline: "none",
 };
