@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { collection, addDoc, onSnapshot, query, deleteDoc, doc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, onSnapshot, query, deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { CheckSquare } from "lucide-react";
 import TaskCard from "./TaskCard";
@@ -41,7 +41,7 @@ export default function TasksSection({ uid }) {
     if (!input.trim()) return;
     setAdding(true);
     try {
-      await addDoc(col, { text: input.trim(), done: false, priority, date: todayKey(), createdAt: serverTimestamp() });
+      await addDoc(col, { text: input.trim(), done: false, priority, date: todayKey(), createdAt: Date.now() });
       setInput("");
     } finally {
       setAdding(false);
