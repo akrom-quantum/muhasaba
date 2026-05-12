@@ -12,25 +12,26 @@ const STATUS = {
   "missed":  { label: "Missed",  bg: "var(--err-bg)",  color: "var(--err-text)",  border: "var(--err-border)"  },
 };
 
-function todayKey() {
-  return new Date().toISOString().slice(0, 10);
-}
+function todayKey() { return new Date().toISOString().slice(0, 10); }
 
-export default function IbadahSection({ uid }) {
+export default function IbadahSection({ uid, date }) {
+  const activeDate = date || todayKey();
   const [data, setData] = useState({ salahs: {} });
-  const docRef = doc(db, "users", uid, "ibadah", todayKey());
 
   useEffect(() => {
-    return onSnapshot(docRef, (snap) => {
-      if (snap.exists()) setData(snap.data());
+    setData({ salahs: {} });
+    const ref = doc(db, "users", uid, "ibadah", activeDate);
+    return onSnapshot(ref, (snap) => {
+      setData(snap.exists() ? snap.data() : { salahs: {} });
     });
-  }, [uid]);
+  }, [uid, activeDate]);
 
   function setSalahStatus(salah, status) {
+    const ref = doc(db, "users", uid, "ibadah", activeDate);
     const next = data.salahs?.[salah] === status ? "" : status;
     const updated = { ...data, salahs: { ...data.salahs, [salah]: next } };
     setData(updated);
-    setDoc(docRef, updated, { merge: true });
+    setDoc(ref, updated, { merge: true });
   }
 
   const completedCount = SALAHS.filter((s) => ["on-time", "qaza"].includes(data.salahs?.[s])).length;
@@ -39,10 +40,10 @@ export default function IbadahSection({ uid }) {
     <div style={{ background: "var(--surface)", borderRadius: 16, padding: "1.5rem", border: "1px solid var(--border)" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.25rem" }}>
         <h2 style={{ fontSize: "1.1rem", fontWeight: 700, color: "var(--text)", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-          <Clock size={18} color="var(--accent)" /> Ibadah
+          <Clock size={18} color="var(--accent)" /> Salah
         </h2>
         <span style={{ background: "var(--accent-dim)", color: "var(--accent)", fontSize: "0.7rem", fontWeight: 700, padding: "0.2rem 0.6rem", borderRadius: 20 }}>
-          {completedCount}/5 salah
+          {completedCount}/5
         </span>
       </div>
 

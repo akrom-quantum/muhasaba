@@ -1,26 +1,39 @@
 "use client";
 import { useState, useEffect } from "react";
-import { collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, updateDoc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, onSnapshot, query, deleteDoc, doc, updateDoc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Target } from "lucide-react";
 import HabitCard from "./HabitCard";
 import HabitForm from "./HabitForm";
-import { isScheduledToday, getPrevScheduledDay, getMonday, DEFAULT_REPEAT } from "./RepeatPicker";
+import { getPrevScheduledDay, getMonday, DEFAULT_REPEAT } from "./RepeatPicker";
 
 function todayKey() {
   return new Date().toISOString().slice(0, 10);
 }
 
-export default function HabitsSection({ uid }) {
+function dayNameForDate(dateStr) {
+  return new Date(dateStr + "T00:00:00").toLocaleDateString("en-US", { weekday: "long" });
+}
+
+function isScheduledForDate(habit, dateStr) {
+  const repeat = habit.repeat || DEFAULT_REPEAT;
+  if (repeat.type === "daily") return true;
+  if (repeat.type === "times_per_week") return true;
+  if (repeat.type === "specific_days") return (repeat.days || []).includes(dayNameForDate(dateStr));
+  return true;
+}
+
+export default function HabitsSection({ uid, date }) {
+  const activeDate = date || todayKey();
   const [habits, setHabits] = useState([]);
-  const [todayLogs, setTodayLogs] = useState({});
+  const [dateLogs, setDateLogs] = useState({});
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const habitsCol = collection(db, "users", uid, "habits");
 
   useEffect(() => {
-    const q = query(habitsCol, orderBy("createdAt", "asc"));
+    const q = query(habitsCol);
     return onSnapshot(q, (snap) => {
       setHabits(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
     });
@@ -28,14 +41,14 @@ export default function HabitsSection({ uid }) {
 
   useEffect(() => {
     if (!habits.length) return;
-    const today = todayKey();
+    setDateLogs({});
     const unsubs = habits.map((h) =>
-      onSnapshot(doc(db, "users", uid, "habits", h.id, "logs", today), (snap) => {
-        setTodayLogs((prev) => ({ ...prev, [h.id]: snap.exists() ? snap.data() : null }));
+      onSnapshot(doc(db, "users", uid, "habits", h.id, "logs", activeDate), (snap) => {
+        setDateLogs((prev) => ({ ...prev, [h.id]: snap.exists() ? snap.data() : null }));
       })
     );
     return () => unsubs.forEach((u) => u());
-  }, [habits, uid]);
+  }, [habits, uid, activeDate]);
 
   async function handleAddHabit(form) {
     setSaving(true);
@@ -44,7 +57,7 @@ export default function HabitsSection({ uid }) {
         ...form,
         streak: 0, bestStreak: 0, lastCompletedDate: null,
         currentWeekKey: null, currentWeekCount: 0, lastCompletedWeek: null,
-        createdAt: serverTimestamp(),
+        createdAt: Date.now(),
       });
       setOpen(false);
     } finally {
@@ -53,26 +66,24 @@ export default function HabitsSection({ uid }) {
   }
 
   async function handleToggle(habit) {
-    const today = todayKey();
-    const logRef = doc(db, "users", uid, "habits", habit.id, "logs", today);
-    const existing = todayLogs[habit.id];
+    const logRef = doc(db, "users", uid, "habits", habit.id, "logs", activeDate);
+    const existing = dateLogs[habit.id];
     if (existing?.done) {
-      await setDoc(logRef, { done: false, value: 0, date: today });
+      await setDoc(logRef, { done: false, value: 0, date: activeDate });
     } else {
-      await setDoc(logRef, { done: true, value: 1, date: today });
-      await updateStreak(habit.id);
+      await setDoc(logRef, { done: true, value: 1, date: activeDate });
+      if (activeDate === todayKey()) await updateStreak(habit.id);
     }
   }
 
   async function handleCountChange(habit, delta) {
-    const today = todayKey();
-    const logRef = doc(db, "users", uid, "habits", habit.id, "logs", today);
-    const existing = todayLogs[habit.id];
+    const logRef = doc(db, "users", uid, "habits", habit.id, "logs", activeDate);
+    const existing = dateLogs[habit.id];
     const current = existing?.value || 0;
     const newVal = Math.max(0, current + delta);
     const done = newVal >= (habit.goalValue || 1);
-    await setDoc(logRef, { done, value: newVal, date: today });
-    if (done && !existing?.done) await updateStreak(habit.id);
+    await setDoc(logRef, { done, value: newVal, date: activeDate });
+    if (done && !existing?.done && activeDate === todayKey()) await updateStreak(habit.id);
   }
 
   async function updateStreak(habitId) {
@@ -120,8 +131,8 @@ export default function HabitsSection({ uid }) {
     await deleteDoc(doc(db, "users", uid, "habits", id));
   }
 
-  const scheduledHabits = habits.filter((h) => isScheduledToday(h));
-  const doneCount = scheduledHabits.filter((h) => todayLogs[h.id]?.done).length;
+  const scheduledHabits = habits.filter((h) => isScheduledForDate(h, activeDate));
+  const doneCount = scheduledHabits.filter((h) => dateLogs[h.id]?.done).length;
 
   return (
     <div style={{ background: "var(--surface)", borderRadius: 16, padding: "1.5rem", border: "1px solid var(--border)" }}>
@@ -145,13 +156,13 @@ export default function HabitsSection({ uid }) {
 
       {scheduledHabits.length === 0 && !open ? (
         <p style={{ color: "var(--muted)", fontSize: "0.875rem", textAlign: "center", padding: "1rem 0" }}>
-          {habits.length === 0 ? "No habits yet" : "No habits scheduled today"}
+          {habits.length === 0 ? "No habits yet" : "No habits scheduled for this day"}
         </p>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
           {scheduledHabits.map((h) => (
             <HabitCard
-              key={h.id} habit={h} log={todayLogs[h.id]}
+              key={h.id} habit={h} log={dateLogs[h.id]}
               onToggle={handleToggle}
               onCountChange={handleCountChange}
               onDelete={handleDelete}

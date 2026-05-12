@@ -122,8 +122,9 @@ export default function TasksPage() {
           ))}
         </div>
 
+        <style>{`@media (max-width: 767px) { .tasks-grid { grid-template-columns: 1fr !important; } }`}</style>
         {/* Main grid: calendar + task panel */}
-        <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1.1fr)", gap: "1.5rem", alignItems: "start" }}>
+        <div className="tasks-grid" style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1.1fr)", gap: "1.5rem", alignItems: "start" }}>
 
           {/* Calendar */}
           <div style={{ background: surface, borderRadius: 16, padding: "1.5rem", border: `1px solid ${border}` }}>
@@ -146,7 +147,7 @@ export default function TasksPage() {
                 />
                 <button type="submit" disabled={adding || !input.trim()}
                   style={{ padding: "0.6rem 1rem", background: accent, border: "none", borderRadius: 8, color: "#fff", fontWeight: 700, fontSize: "0.875rem", opacity: adding || !input.trim() ? 0.5 : 1, flexShrink: 0 }}>
-                  <Plus size={15} />
+                  + Add
                 </button>
               </div>
               <div style={{ display: "flex", gap: "0.3rem" }}>

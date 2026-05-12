@@ -15,8 +15,9 @@ function todayKey() {
   return new Date().toISOString().slice(0, 10);
 }
 
-export default function TasksSection({ uid }) {
-  const [tasks, setTasks] = useState([]);
+export default function TasksSection({ uid, date }) {
+  const activeDate = date || todayKey();
+  const [allTasks, setAllTasks] = useState([]);
   const [input, setInput] = useState("");
   const [priority, setPriority] = useState("medium");
   const [adding, setAdding] = useState(false);
@@ -26,26 +27,31 @@ export default function TasksSection({ uid }) {
   useEffect(() => {
     const q = query(col);
     return onSnapshot(q, (snap) => {
-      const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() })).filter((t) => t.date === todayKey());
+      const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
       docs.sort((a, b) => {
         const at = a.createdAt?.toMillis?.() ?? (a.createdAt || 0);
         const bt = b.createdAt?.toMillis?.() ?? (b.createdAt || 0);
         return bt - at;
       });
-      setTasks(docs);
+      setAllTasks(docs);
     });
   }, [uid]);
 
-  async function handleAdd(e) {
-    e.preventDefault();
+  const tasks = allTasks.filter((t) => t.date === activeDate);
+
+  async function handleAdd() {
     if (!input.trim()) return;
     setAdding(true);
     try {
-      await addDoc(col, { text: input.trim(), done: false, priority, date: todayKey(), createdAt: Date.now() });
+      await addDoc(col, { text: input.trim(), done: false, priority, date: activeDate, createdAt: Date.now() });
       setInput("");
     } finally {
       setAdding(false);
     }
+  }
+
+  function handleKeyDown(e) {
+    if (e.key === "Enter") handleAdd();
   }
 
   async function handleToggle(id, done) {
@@ -73,14 +79,14 @@ export default function TasksSection({ uid }) {
         </h2>
       </div>
 
-      <form onSubmit={handleAdd} style={{ marginBottom: "1.25rem" }}>
+      <div style={{ marginBottom: "1.25rem" }}>
         <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.4rem" }}>
           <input
-            value={input} onChange={(e) => setInput(e.target.value)}
+            value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={handleKeyDown}
             placeholder="Add a task…"
             style={{ flex: 1, padding: "0.6rem 0.875rem", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 8, color: "var(--text)", fontSize: "0.875rem", outline: "none", minWidth: 0 }}
           />
-          <button type="submit" disabled={adding || !input.trim()}
+          <button type="button" onClick={handleAdd} disabled={adding || !input.trim()}
             style={{ padding: "0.5rem 0.875rem", background: "var(--accent)", border: "none", borderRadius: 8, color: "#fff", fontWeight: 700, fontSize: "0.875rem", opacity: adding || !input.trim() ? 0.5 : 1, flexShrink: 0 }}>
             + Add
           </button>
@@ -93,7 +99,7 @@ export default function TasksSection({ uid }) {
             </button>
           ))}
         </div>
-      </form>
+      </div>
 
       {tasks.length === 0 ? (
         <p style={{ color: "var(--muted)", fontSize: "0.875rem", textAlign: "center", padding: "1rem 0" }}>No tasks today</p>

@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, onSnapshot, query, deleteDoc, doc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { BookOpen } from "lucide-react";
 import MuhasabaCard from "./MuhasabaCard";
@@ -10,7 +10,8 @@ function todayKey() {
   return new Date().toISOString().slice(0, 10);
 }
 
-export default function MuhasabaSection({ uid }) {
+export default function MuhasabaSection({ uid, date }) {
+  const activeDate = date || todayKey();
   const [entries, setEntries] = useState([]);
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -18,16 +19,21 @@ export default function MuhasabaSection({ uid }) {
   const col = collection(db, "users", uid, "muhasabaEntries");
 
   useEffect(() => {
-    const q = query(col, orderBy("createdAt", "desc"));
+    setEntries([]);
+    const q = query(col);
     return onSnapshot(q, (snap) => {
-      setEntries(snap.docs.map((d) => ({ id: d.id, ...d.data() })).filter((e) => e.date === todayKey()));
+      const docs = snap.docs
+        .map((d) => ({ id: d.id, ...d.data() }))
+        .filter((e) => e.date === activeDate);
+      docs.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      setEntries(docs);
     });
-  }, [uid]);
+  }, [uid, activeDate]);
 
   async function handleSave(form) {
     setSaving(true);
     try {
-      await addDoc(col, { ...form, date: todayKey(), createdAt: serverTimestamp() });
+      await addDoc(col, { ...form, date: activeDate, createdAt: Date.now() });
       setOpen(false);
     } finally {
       setSaving(false);
